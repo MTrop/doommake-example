@@ -1,0 +1,28 @@
+==============================================================================
+===== CREDITS
+==============================================================================
+
+If something was color-shifted or translated or the sound was tweaked, it was 
+me.
+
+For all the other stuff and original graphics:
+
+Graphics
+--------
+
+This PWAD contains select texture(s) and flat(s) that can originally be found
+in GothicDM or Gothic2. Credit and thanks go out to the artist(s) of said
+flat(s) and texture(s) and also to the rest of the Gothic Crew (1997/98). The
+ORIGINAL GothicDM(2).ZIP can be found at CDROM.COM. Each said PKZIP archive
+contains thirty-two professional quality levels and music.
+[Your Favorite idGames Mirror]/levels/doom2/deathmatch/megawads/gothicdm.zip
+[Your Favorite idGames Mirror]/levels/doom2/deathmatch/megawads/gothic2.zip
+
+Pistol Graphics by Eriance/Amuscaria
+Lever-Action Shotgun Graphics by Batandy
+Crowman by RNG Breadbag/BreadBagFly
+
+Music
+-----
+TITLE - "In My Mind" by Jimmy Paddock
+MAP01 - "Jello Mackerel" by Jimmy Paddock

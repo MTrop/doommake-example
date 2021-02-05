@@ -1,0 +1,218 @@
+/*****************************************************************************
+ * DECOHack Patch File
+ * Main
+ ****************************************************************************/
+
+#include "classpath:decohack/doom19.dh"
+#include "classpath:decohack/constants/friendly_things.dh"
+
+// ------------   Ammo  ---------------
+
+ammo AM_CLIP
+{
+	max 250
+}
+
+// ------------   Strings  ---------------
+
+strings
+{
+	STR_HUSTR_1     "1: New Map"
+    STR_GOTSHOTGUN  "An old Winchester!"
+}
+
+// ------------   State Freeing  ---------------
+
+thing MTF_IMP free states
+thing MTF_COMMANDERKEEN free states
+thing MTF_SSNAZI free states
+weapon WP_SHOTGUN free states
+weapon WP_PISTOL free states
+
+// ------------   Things  ---------------
+
+#define FLAGS_MONSTER    flags 0x00400006
+
+thing MTF_IMP_FIREBALL "Crowman Shot"
+{
+	speed 15
+	damage 2
+}
+
+thing MTF_IMP "Crowman"
+{
+	ednum 3001
+
+	health 50
+	speed 8
+	radius 20
+	height 56
+	damage 0
+	reactiontime 8
+	painchance 200
+	mass 100
+
+	FLAGS_MONSTER
+
+	clear sounds
+	seesound "bgsit1"
+	attacksound ""
+	painsound "popain"
+	deathsound "bgdth1"
+	activesound "bgact"
+
+	clear states
+	states
+	{
+		spawn:
+			TROO AB 10 A_Look
+			loop
+		see:
+			TROO AABBCCDD 3 A_Chase
+			loop
+		melee:
+		missile:
+			TROO EF 8 A_FaceTarget
+			TROO G 6 A_TroopAttack
+			TROO H 6 A_FaceTarget
+			TROO I 6 A_TroopAttack
+			goto see
+		pain:
+			TROO J 2
+			TROO J 2 A_Pain
+			goto see
+		death:
+			TROO K 8
+			TROO L 8 A_Scream
+			TROO M 6
+			TROO N 6 A_Fall
+		corpse: // used later for "dead" object
+			TROO O -1
+			stop
+		xdeath:
+			TROO P 5
+			TROO Q 5 A_XScream
+			TROO R 5
+			TROO S 5 A_Fall
+			TROO TUV 5
+			TROO W -1
+			stop
+		raise:
+			TROO NMLKJ 8
+			goto see
+	}
+}
+
+thing MTF_IMP_DEAD "Dead Crowman"
+{
+	state spawn thing MTF_IMP corpse
+}
+
+thing MTF_COMMANDERKEEN "Chaos Sphere"
+{
+	ednum 72
+
+	health 100
+	speed 0
+	radius 24
+	height 72
+	damage 0
+	reactiontime 1
+	painchance 256
+	mass 1000000
+
+	FLAGS_MONSTER
+	+NOBLOOD
+	-COUNTKILL
+
+	clear sounds
+	painsound "keenpn"
+	deathsound "keendt"
+
+	clear states
+	states
+	{
+		spawn:
+			KEEN ABCDEFG 3 Bright
+			loop
+		pain:
+			KEEN G 3 Bright A_Pain
+			goto spawn
+		death:
+			KEEN H 8 Bright
+			KEEN I 8 Bright A_Scream
+			KEEN JK 8 Bright
+			KEEN L 8 A_KeenDie
+			KEEN M -1
+			stop
+	}
+}
+
+// Effectively cannibalized for states and pointers
+thing MTF_SSNAZI "[BLANK]"
+{
+	Flags 0
+	clear sounds
+	clear states
+	state spawn thing MTF_CANDLE spawn
+}
+
+// ------------   Weapons  ---------------
+
+weapon WP_SHOTGUN "Yellowboy Shotgun"
+{
+	ammotype AM_SHELL
+	clear states
+	states
+	{
+		ready:
+			SHTG A 1 A_WeaponReady
+			wait
+		select:
+			SHTG A 1 A_Raise
+			wait
+		deselect:
+			SHTG A 1 A_Lower
+			wait
+		fire:
+			SHTG A 2
+			SHTG A 5 A_FireShotgun
+			SHTG BC 4
+			SHTG D 5
+			SHTG CB 4
+			SHTG A 2
+			SHTG A 5 A_ReFire
+			goto ready
+		flash:
+			SHTF A 3 Bright A_Light1
+			SHTF B 2 Bright A_Light2
+			goto lightdone
+	}
+}
+
+weapon WP_PISTOL "Glock"
+{
+	ammotype AM_CLIP
+	clear states
+	states
+	{
+		ready:
+			PISG A 1 A_WeaponReady
+			wait
+		select:
+			PISG A 1 A_Raise
+			wait
+		deselect:
+			PISG A 1 A_Lower
+			wait
+		fire:
+			PISG B 2 A_FirePistol
+			PISG C 4
+			PISG A 2
+			PISG A 4 A_ReFire
+			goto ready
+		flash:
+			PISF A 2 Bright A_Light1
+			goto lightdone
+	}
+}
