@@ -19,7 +19,7 @@ Additional Credits to   : Jimmy, RNG Breadbag, The Gothic Crew, Amuscaria,
 * What is included *
 
 New levels              : MAP01
-Sounds                  : No
+Sounds                  : Yes
 Music                   : Yes
 Graphics                : Yes
 Dehacked/BEX Patch      : DeHackEd Lump
