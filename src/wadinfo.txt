@@ -12,7 +12,7 @@ Misc. Author Info       : I'm kinda a legend
 Description             : This is an example project that can be built in 
                           DoomMake. The map is okay.
 
-Additional Credits to   : Jimmy, RNG Breadbag, The GOTHICTX Team, Amuscaria,
+Additional Credits to   : Jimmy, RNG Breadbag, The Gothic Crew, Amuscaria,
                           Batandy.
                           See CREDITS.txt (or the CREDITS lump in the WAD).
 ===========================================================================
@@ -38,7 +38,7 @@ Difficulty Settings     : Not implemented
 * Construction *
 
 Base                    : New from scratch
-Build Time              : 1 hour
+Build Time              : 2 hours
 Editor(s) used          : DoomTools Suite, DECOHack, Ultimate Doom Builder, SLADE, Paint.Net
 Known Bugs              : None
 May Not Run With        : 
