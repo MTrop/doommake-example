@@ -16,7 +16,7 @@ Create a file called `doommake.properties` and throw this stuff in there:
 	doommake.run.switch.file=-merge
 
 You'll probably have to change those paths to the pertinent files. Note that `.properties` 
-files use backslashes differently (see the [Wikipedia Page](https://en.wikipedia.org/wiki/.properties). 
+files use backslashes differently (see the [Wikipedia Page](https://en.wikipedia.org/wiki/.properties)). 
 The first property is for the IWAD to use as a base for texture merging (`DOOM2.WAD`), 
 and the other is for locating Chocolate Doom to test (if you don't use Chocolate Doom, 
 remove the last line).
