@@ -3,8 +3,8 @@
  * Main
  ****************************************************************************/
 
-#include "classpath:decohack/doom19.dh"
-#include "classpath:decohack/constants/friendly_things.dh"
+#include <doom19>
+#include <friendly>
 
 // ------------   Ammo  ---------------
 

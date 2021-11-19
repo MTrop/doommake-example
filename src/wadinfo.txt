@@ -27,7 +27,7 @@ Demos                   : No
 
 * Play Information *
 
-Game                    : Doom 2 / Heretic ... etc.
+Game                    : Doom 2
 Map #                   : MAP01
 Single Player           : Designed for
 Cooperative 2-4 Player  : No
@@ -39,7 +39,7 @@ Difficulty Settings     : Not implemented
 
 Base                    : New from scratch
 Build Time              : 2 hours
-Editor(s) used          : DoomTools Suite, DECOHack, Ultimate Doom Builder, SLADE, Paint.Net
+Editor(s) used          : DoomTools Suite, DoomMake, DECOHack, Ultimate Doom Builder, SLADE, Paint.Net
 Known Bugs              : None
 May Not Run With        : 
 Tested With             : Chocolate Doom 3.0.1

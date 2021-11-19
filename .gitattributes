@@ -6,9 +6,15 @@
 *.pk3 binary
 
 # Common Doom Project Text
-*.deh text
-*.bex text
+*.deh text eol=crlf
+*.bex text eol=crlf
 *.zsc text
 *.zscript text
 *.acs text
 *.dh text
+*.cmd text
+*.sh text
+
+# Keep OS-specific line endings.
+*.cmd eol=crlf
+*.sh eol=lf

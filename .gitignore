@@ -35,13 +35,15 @@ doommake.properties
 # Generate-able by DoomMake
 /build
 /dist
-/gen
 
 # Doom Builder and Others
 *.dbs
 *.o
 *.bak
 *.backup*
+
+# Local WhackEd Config for Patch  
+*.whacked
 
 
 ###############################

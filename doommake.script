@@ -12,53 +12,151 @@
 /* ------------------------------------------------------------------------ */
 
 /**
- * Cleans the build directory found in the properties.
+ * Cleans the build directory and distro directory found in the properties.
  */
 function doClean() {
 	initBuild();
-	return cleandir(getBuildDirectory());
+	println("Cleaning build and dist...");
+	out = cleandir(getBuildDirectory()) && cleandir(getDistDirectory());	
+	println("Done.");
+	return out; 
 }
 
 
 /* ------------------------------------------------------------------------ */
 
-#define SRC_DECOHACK        "src/decohack/main.dh"
+#define SRC_DECOHACK        "/decohack"
+#define SRC_DECOHACK_MAIN   "/main.dh"
 
 /**
  * Calls DECOHack.
  * Creates patch.
  */
 check function doPatch(budget) {
+
 	initBuild();
+
+	outFile = getBuildDirectory() + "/" + getPatchFile();
+	outSourceFile = getBuildDirectory() + "/" + getPatchSourceOutputFile();
+	sourceDir = getSourceDirectory() + SRC_DECOHACK;
+	verifydirs(sourceDir);
+
+	if (checkFileExistenceAndBuildStatuses(outFile)) {
+		hash = directoryHasChanged(sourceDir);
+		if (hash === null) {
+			println("[Skipped] DECOHack directory (" + sourceDir + ") up to date.");
+			return;
+		}
+	} else {
+		hash = directoryHasChanged(sourceDir);
+	}
+
+	println("Compiling patch...");
+
 	decohack(
-		file(SRC_DECOHACK), 
-		file(getBuildDirectory() + "/" + getPatchFile()), 
-		budget
+		file(getSourceDirectory() + SRC_DECOHACK + SRC_DECOHACK_MAIN), 
+		file(outFile), 
+		budget,
+		file(outSourceFile)
 	);
+	
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("dehacked");
 }
 
 /* ------------------------------------------------------------------------ */
 
-#define SRC_DIR_MAPS     "src/maps"
-#define MERGESCRIPT_MAPS "scripts/merge-maps.txt"
+#define SRC_DIR_ASSETS     "/assets" 
+#define SRC_DIR_CONVERT    "/convert" 
 
 /**
- * Merges maps together.
- * Creates map WAD.
+ * Converts sound assets in the conversion directories.
+ * Puts them in the sound assets folder.
  */
-function doMaps() {
+check function doConvertSounds() {
+	
 	initBuild();
-	verifydirs(SRC_DIR_MAPS);
-	wadmerge(file(MERGESCRIPT_MAPS), [
-		getBuildDirectory(),
-		getMapsWAD()
-	]);
+
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/sounds";
+	targetDir = getSourceDirectory() + SRC_DIR_ASSETS + "/sounds";
+	verifydirs(sourceDir);
+	verifydirs(targetDir);
+		
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("[Skipped] Sound conversion directory (" + sourceDir + ") up to date.");
+		return;
+	}
+
+	println("Converting sounds...");
+	
+	convertdmx(sourceDir, targetDir);
+
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("convert-sound");
+	println("Sounds converted from `" + sourceDir + "` to `" + targetDir + "`.");
+}
+
+/**
+ * Converts graphics assets in the conversion directories.
+ * Puts them in the graphics assets folder.
+ */
+check function doConvertGraphics() {
+	
+	initBuild();
+
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/graphics";
+	targetDir = getSourceDirectory() + SRC_DIR_ASSETS + "/graphics";
+	verifydirs(sourceDir);
+	verifydirs(targetDir);
+			
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("[Skipped] Graphic conversion directory (" + sourceDir + ") up to date.");
+		return;
+	}
+
+	println("Converting graphics...");
+	
+	convert(sourceDir, targetDir, "graphics");
+
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("convert-graphics");
+	println("Graphics converted from `" + sourceDir + "` to `" + targetDir + "`.");
+}
+
+/**
+ * Converts sprite assets in the conversion directories.
+ * Puts them in the sprite assets folder.
+ */
+check function doConvertSprites() {
+	
+	initBuild();
+
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/sprites";
+	targetDir = getSourceDirectory() + SRC_DIR_ASSETS + "/sprites";
+	verifydirs(sourceDir);
+	verifydirs(targetDir);
+			
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("[Skipped] Sprite conversion directory (" + sourceDir + ") up to date.");
+		return;
+	}
+
+	println("Converting sprites...");
+	
+	convert(sourceDir, targetDir, "graphics");
+
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("convert-sprites");
+	println("Sprites converted from `" + sourceDir + "` to `" + targetDir + "`.");
 }
 
 
 /* ------------------------------------------------------------------------ */
 
-#define SRC_DIR_ASSETS     "src/assets" 
+#define SRC_DIR_ASSETS     "/assets" 
 #define MERGESCRIPT_ASSETS "scripts/merge-assets.txt"
 
 /**
@@ -79,26 +177,85 @@ check function cleanUpAssetWAD(wadpath) {
 }
 
 /**
- * Calls the merge script for merging maps.
+ * Calls the merge script for merging assets.
  * Creates assets WAD.
  */
 check function doAssets() {
 	
 	initBuild();
-	verifydirs(SRC_DIR_ASSETS + "/_global");
-	verifydirs(SRC_DIR_ASSETS + "/graphics");
-	verifydirs(SRC_DIR_ASSETS + "/music");
-	verifydirs(SRC_DIR_ASSETS + "/sounds");
-	verifydirs(SRC_DIR_ASSETS + "/sprites");
+
+	outWad = getBuildDirectory() + "/" + getAssetsWAD();
+
+	sourceDir = getSourceDirectory() + SRC_DIR_ASSETS;
+	verifydirs(sourceDir + "/_global");
+	verifydirs(sourceDir + "/graphics");
+	verifydirs(sourceDir + "/music");
+	verifydirs(sourceDir + "/sounds");
+	verifydirs(sourceDir + "/sprites");
+		
+	if (checkFileExistenceAndBuildStatuses(outWad)) {
+		hash = directoryHasChanged(sourceDir);
+		if (hash === null) {
+			println("[Skipped] Assets directory (" + sourceDir + ") up to date.");
+			return;
+		}
+	} else {
+		hash = directoryHasChanged(sourceDir);
+	}
+	
+	println("Building assets...");
 	
 	wadmerge(file(MERGESCRIPT_ASSETS), [
 		getBuildDirectory(),
+		getSourceDirectory(),
 		getAssetsWAD()
 	]);
+	cleanUpAssetWAD(outWad);
 	
-	cleanUpAssetWAD(getBuildDirectory() + "/" + getAssetsWAD());
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("assets");
 }
 
+
+/* ------------------------------------------------------------------------ */
+
+#define SRC_DIR_MAPS     "/maps"
+#define MERGESCRIPT_MAPS "scripts/merge-maps.txt"
+
+/**
+ * Merges maps together.
+ * Creates map WAD.
+ */
+check function doMaps() {
+
+	initBuild();
+	
+	outWad = getBuildDirectory() + "/" + getMapsWad();
+
+	sourceDir = getSourceDirectory() + SRC_DIR_MAPS;
+	verifydirs(sourceDir);
+
+	if (checkFileExistenceAndBuildStatuses(outWad)) {
+		hash = directoryHasChanged(sourceDir);
+		if (hash === null) {
+			println("[Skipped] Maps directory (" + sourceDir + ") up to date.");
+			return;
+		}
+	} else {
+		hash = directoryHasChanged(sourceDir);
+	}
+
+	println("Building maps...");
+
+	wadmerge(file(MERGESCRIPT_MAPS), [
+		getBuildDirectory(),
+		getSourceDirectory(),
+		getMapsWad()
+	]);
+	
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("maps");
+}
 
 /* ------------------------------------------------------------------------ */
 
@@ -112,15 +269,16 @@ function getMapTexWad() {
 	return prop(PROP_MAPTEXWAD, DEFAULT_MAPTEXWAD); 
 }
 
+
 /* ------------------------------------------------------------------------ */
+
+#define SRC_DIR_TEXTUREWADS "/wads/textures"
 
 /**
  * Scans the project for available texture WADs.
  */
-#define SRC_DIR_TEXTUREWADS "src/wads/textures"
-
 function scanTextureWADList() {
-	return filelist(SRC_DIR_TEXTUREWADS, false, REGEX_WADFILES);
+	return filelist(getSourceDirectory() + SRC_DIR_TEXTUREWADS, false, REGEX_WADFILES);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -130,35 +288,55 @@ function scanTextureWADList() {
  * Creates maptex WAD.
  */
 check function doMapTextures() {
-	initBuild();
-	verifydirs(SRC_DIR_TEXTUREWADS);
-
-	// Only do if maps were compiled.
-	if (!fileexists(getBuildDirectory() + "/" + getMapsWad())) {
-		println("No maps in `" + (getBuildDirectory() + "/" + getMapsWad()) + "`. Skipping texture extraction.");
-		return;
-	}
-
-	textureWadFiles = scanTextureWadList();
-	if (empty(textureWadFiles)) {
-		println("WARNING: No texture WADs found in: " + SRC_DIR_TEXTUREWADS + ". Skipping texture extraction step.");
-		return;
-	}
 	
+	initBuild();
+
 	baseIwadPath = getIwad();
 	if (empty(baseIwadPath))
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+		
+	// Figure out where the textures are.
+	textureWad = getBuildDirectory() + "/" + getTextureWad();
 
-	outputWad = getBuildDirectory() + "/" + getMapTexWad();
+	mapsWadPath = getBuildDirectory() + "/" + getMapsWad();
+	outWad = getBuildDirectory() + "/" + getMapTexWad();
+
+	// Gather all WADs.
+	textureWadPathList = scanTextureWADList() ?? [];
+	if (fileexists(textureWad)) {
+		textureWadPathList->listAdd(textureWad);
+	}
+
+	if (empty(textureWadPathList)) {
+		println("[Skipped] No textures to extract for maps. Skipping texture extraction.");
+		wadfilecreate(outWad);
+		return;
+	}
+	
+	// Only do if maps were compiled.
+	if (!fileExists(mapsWadPath)) {
+		println("[Skipped] No maps at `" + mapsWadPath + "`. Maps WAD not built. Skipping texture extraction.");
+		wadfilecreate(outWad);
+		return;
+	}
+
+	// Texture extraction.
+	if (checkFileExistenceAndBuildStatuses(outWad, ["maps", "textures"])) {
+		println("[Skipped] Both maps and textures were not built. Skipping map texture rebuild.");
+		return;
+	}
+
+	println("Extracting map textures...");
 
 	extractUsedMapTextures(
-		baseIwadPath, 
-		[getBuildDirectory() + "/" + getMapsWad()], 
-		textureWadFiles, 
-		outputWad
+		baseIwadPath,
+		[mapsWadPath],
+		textureWadPathList,
+		outWad
 	);
+	
+	setBuilt("maptextures");
 }
-
 
 /* ------------------------------------------------------------------------ */
 
@@ -178,6 +356,10 @@ check function doMapTextures() {
  * dehFile: DEH file to add.
  */
 check function doRun(portType, wadList, dehFile) {
+
+	iwadPath = getIwad();
+	if (empty(iwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
 
 	portType = empty(portType) ? "" : "." + portType;
 
@@ -204,10 +386,6 @@ check function doRun(portType, wadList, dehFile) {
 
 	arguments = [];
 
-	iwadPath = getIwad();
-	if (empty(iwadPath))
-		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
-
 	arguments->listadd(iwadSwitch);
 	arguments->listadd(iwadPath->filecanonpath());
 
@@ -231,7 +409,7 @@ check function doRun(portType, wadList, dehFile) {
 /* ------------------------------------------------------------------------ */
 
 #define MERGESCRIPT_RELEASE "scripts/merge-release.txt"
-#define SRC_WADINFO "src/wadinfo.txt"
+#define SRC_WADINFO "/wadinfo.txt"
 
 /**
  * Initializes the build directory.
@@ -245,7 +423,7 @@ function initDist() {
  * Throws error if unsuccessful.
  */
 function copyProjectTXT(destfile) {
-	srcfile = file(SRC_WADINFO);
+	srcfile = file(getSourceDirectory() + SRC_WADINFO);
 	println("Copying " + srcfile + " to " + destfile + "...");
 	return copyfile(srcfile, destfile, true);
 }
@@ -256,8 +434,11 @@ function copyProjectTXT(destfile) {
 check function doAll() {
 	initBuild();
 	doPatch(false);
-	doMaps();
+	doConvertSounds();
+	doConvertGraphics();
+	doConvertSprites();
 	doAssets();
+	doMaps();
 	doMapTextures();
 }
 
@@ -266,24 +447,53 @@ check function doAll() {
  */
 check function doRelease() {
 
+	outFile = getBuildDirectory() + "/" + getProjectWAD();
+
+	if (checkFileExistenceAndBuildStatuses(outFile, ["dehacked", "maps", "assets", "maptextures"])) {
+		println("[Skipped] No pertinent project data built.");
+		return;
+	}
+
 	wadmerge(file(MERGESCRIPT_RELEASE), [
 		getBuildDirectory()
+		,getSourceDirectory()
 		,getProjectWad()
 		,getPatchFile()
-		,getMapsWad()
+		,getPatchSourceOutputFile()
 		,getAssetsWAD()
 		,getMapTexWad()
+		,getMapsWad()
+		,getMapTexWad()
 	]);
+	setBuilt("release");
+}
 
+/**
+ * Assembles the distributable.
+ */
+check function doDist() {
+
+	projectFile = getBuildDirectory() + "/" + getProjectWAD();
+	outTextFile = getBuildDirectory() + "/" + getProjectTXT();
+	outDistZipFile = getDistDirectory() + "/" + getProjectZip();
+	outDistTextFile = getDistDirectory() + "/" + getProjectTXT();
+
+	if (checkFileExistenceAndBuildStatuses([outTextFile, outDistZipFile, outDistTextFile], "release")) {
+		println("[Skipped] No release rebuilt - no distributable needs building.");
+		return;
+	}
+
+	println("Assembling distributable...");
 	// Assemble project archive.
 	initDist();
-	copyProjectTXT(getBuildDirectory() + "/" + getProjectTXT());
-	copyProjectTXT(getDistDirectory() + "/" + getProjectTXT());
-	zipProject([
-		getBuildDirectory() + "/" + getProjectWAD(), 
-		getBuildDirectory() + "/" + getProjectTXT()
+	copyProjectTXT(outTextFile);
+	copyProjectTXT(outDistTextFile);
+	println("Zipping project to " + outDistZipFile + "...");
+	zipfiles(outDistZipFile, [
+		projectFile, 
+		outTextFile
 	]);
-	
+
 	println("Done!");
 }
 
@@ -321,6 +531,33 @@ check entry patch(args) {
 }
 
 /*****************************************************************************
+ * TARGET: convert
+ *****************************************************************************
+ * Converts assets to Doom assets and puts them in the asset directories.
+ * doommake convert
+ ****************************************************************************/
+check entry convert(args) {
+	doConvertSounds();
+	doConvertGraphics();
+	doConvertSprites();
+}
+
+
+/*****************************************************************************
+ * TARGET: assets
+ *****************************************************************************
+ * Converts and merges the assets WAD.
+ * doommake assets
+ ****************************************************************************/
+check entry assets(args) {
+	doConvertSounds();
+	doConvertGraphics();
+	doConvertSprites();
+	doAssets();
+}
+
+
+/*****************************************************************************
  * TARGET: maps
  *****************************************************************************
  * Merges the maps WAD.
@@ -331,24 +568,13 @@ check entry maps(args) {
 }
 
 /*****************************************************************************
- * TARGET: assets
- *****************************************************************************
- * Merges the assets WAD.
- * doommake assets
- ****************************************************************************/
-check entry assets(args) {
-	doAssets();
-}
-
-
-/*****************************************************************************
  * TARGET: maptextures
  *****************************************************************************
- * Reads the map WADs and texture resources and exports them to a WAD 
- * of used textures.
+ * Reads the map WADs and available texture resources and exports 
+ * a WAD of used textures.
  * doommake maptextures
  ****************************************************************************/
-check entry mapTextures(args) {
+check entry maptextures(args) {
 	doMapTextures();
 }
 
@@ -360,11 +586,36 @@ check entry mapTextures(args) {
  ****************************************************************************/
 check entry run(args) {
 
-	wadList = [
-		getBuildDirectory() + "/" + getProjectWAD()
-	];
+	doInit();
+	doAll();
 	
-	dehFile = getBuildDirectory() + "/" + getPatchFile();
+	// Must use native separator for args passed to program.
+	fs = prop("file.separator", "/");
+	
+	patchPath     = getBuildDirectory() + fs + getPatchFile();
+	assetsWadPath = getBuildDirectory() + fs + getAssetsWAD();
+	mapsWadPath   = getBuildDirectory() + fs + getMapsWAD();
+	texWadPath    = getBuildDirectory() + fs + getTextureWAD();
+	mapTexWadPath = getBuildDirectory() + fs + getMapTextureWAD();
+
+	wadList = [];
+
+	if (fileexists(assetsWadPath))
+		wadlist->listAdd(assetsWadPath);
+	if (fileexists(mapsWadPath))
+		wadlist->listAdd(mapsWadPath);
+
+	// Run will add either add the reduced texture set from compiled maps 
+	// or the compiled textures WAD. If you want to explicitly use one or the
+	// other, edit the following lines:
+
+	if (fileexists(mapTexWadPath))
+		wadlist->listAdd(mapTexWadPath);
+	else if (fileexists(texWadPath))
+		wadlist->listAdd(texWadPath);
+	
+	// Set DEH file here, if any.
+	dehFile = fileexists(patchPath) ? file(patchPath) : null;
 
 	return doRun(args[0], wadList, dehFile);
 }
@@ -376,6 +627,7 @@ check entry run(args) {
  * doommake all
  ****************************************************************************/
 check entry all(args) {
+	doInit();
 	doAll();
 }
 
@@ -383,10 +635,12 @@ check entry all(args) {
 /****************************************************************************
  * TARGET: release
  ****************************************************************************
- * Creates a release and distribution.
+ * Creates a release WAD.
  * doommake release
  ****************************************************************************/
 check entry release(args) {
+	doInit();
+	doAll();
 	doRelease();
 }
 
@@ -395,10 +649,12 @@ check entry release(args) {
  * TARGET: make
  ****************************************************************************
  * Default make target.
+ * Creates a release and packages up the distribution.
  * doommake
  ****************************************************************************/
 check entry make(args) {
 	doInit();
 	doAll();
 	doRelease();
+	doDist();
 }
