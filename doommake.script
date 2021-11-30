@@ -461,7 +461,6 @@ check function doRelease() {
 		,getPatchFile()
 		,getPatchSourceOutputFile()
 		,getAssetsWAD()
-		,getMapTexWad()
 		,getMapsWad()
 		,getMapTexWad()
 	]);

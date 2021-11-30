@@ -16,7 +16,6 @@ mergefile  out $0/$4
 mergewad   out $0/$5
 mergewad   out $0/$6
 mergewad   out $0/$7
-mergewad   out $0/$8
 
 finish out $0/$2
 end
